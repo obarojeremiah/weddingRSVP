@@ -525,7 +525,7 @@ body.on-home-photo .floating-rsvp,body.locked .floating-rsvp{opacity:0;visibilit
 .guest-names-note{font:13px/1.7 var(--sans);color:#777c6c;margin:0 0 18px}
 #additionalGuests{padding:20px 0 0;border-top:1px solid var(--border);margin-bottom:20px}
 @media(max-width:700px){.countdown-photo{height:auto;min-height:0}.countdown-photo img{flex:none;width:100%;height:340px;object-position:center 55%}.ring-verse{padding:13px 18px}.ring-verse blockquote{font-size:14px}}
-@media(max-height:600px){.welcome-heading h1{font-size:25px}.envelope-surname{line-height:1.2}.welcome-heading time{font-size:10px}}
+@media(max-height:600px){.welcome-heading h1{font-size:25px}.envelope-surname{line-height:1.2}.welcome-heading tifme{font-size:10px}}
 .location-card .ceremony-parking{margin:24px 0 0;padding-top:20px;border-top:1px solid var(--border);font:12px/1.7 var(--sans);color:#63705b}
 .event-line-icon{display:inline-block;width:38px;height:38px;color:var(--sage);vertical-align:middle;flex-shrink:0;margin-right:8px}
 .venue-times .event-line-icon{width:44px;height:44px;margin:0 auto 6px}
@@ -738,8 +738,7 @@ body.locked .site,body.letter-opening .site{animation:none;opacity:1;visibility:
       <div class="field"><label for="guestTitle">Title</label><select id="guestTitle" name="title" autocomplete="honorific-prefix"><option value="">Select your title</option><option value="Mr">Mr</option><option value="Mrs">Mrs</option></select></div>
       <div class="field"><label for="guestName">Full name *</label><input id="guestName" name="full_name" type="text" required autocomplete="name" placeholder="Your first and last name"></div>
       <div class="field"><label>Will you attend? *</label><div class="choices"><label class="choice"><input required type="radio" name="attending" value="Yes"> Joyfully accepts</label><label class="choice"><input required type="radio" name="attending" value="No"> Regretfully declines</label></div></div>
-      <div class="field" id="guestCountField"><label for="guestCount">Number of guests, including yourself</label><select id="guestCount" name="number_of_attendees"><option value="1">1 person</option><option value="2">2 people</option><option value="3">3 people</option><option value="4">4 people</option><option value="5">5 people</option><option value="6">6 people</option><option value="7">7 people</option><option value="8">8 people</option><option value="9">9 people</option><option value="10">10 people</option></select></div>
-      <div id="additionalGuests" hidden><p class="guest-names-note">Your name is already included. Please add the full name of each person joining you.</p><div id="guestNameFields"></div></div>
+      <div class="field" id="guestCountField"><label for="guestCount">Number of guests, including yourself</label><select id="guestCount" name="number_of_attendees"><option value="1">1 person</option><option value="2">2 people</option><option value="3">3 people</option>
       <input type="hidden" name="additional_guest_names" id="additionalGuestNames" value="">
       <div class="field"><label for="guestNotes">Dietary requirements or a message (optional)</label><textarea id="guestNotes" name="message" placeholder="Allergies, dietary restrictions"></textarea></div>
       <button class="btn submit" type="submit" id="submitBtn">Send My RSVP ♡</button>
