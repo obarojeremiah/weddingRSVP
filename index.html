@@ -646,6 +646,8 @@ body.locked .site,body.letter-opening .site{animation:none;opacity:1;visibility:
 .home-photo .home-slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 65%;opacity:0;transition:opacity .55s ease}
 .home-photo .home-slide.is-visible{opacity:1}
 @media(prefers-reduced-motion:reduce){.home-photo .home-slide{transition:none}}
+.companion-row{border:1px solid var(--border);border-radius:7px;padding:18px 15px 0;margin:0 0 18px;min-width:0;background:#fffdf880}
+.companion-row legend{padding:0 7px;font:500 17px var(--serif);color:var(--pine)}
 </style>
 </head>
 <body class="locked">
@@ -738,8 +740,10 @@ body.locked .site,body.letter-opening .site{animation:none;opacity:1;visibility:
       <div class="field"><label for="guestTitle">Title</label><select id="guestTitle" name="title" autocomplete="honorific-prefix"><option value="">Select your title</option><option value="Mr">Mr</option><option value="Mrs">Mrs</option></select></div>
       <div class="field"><label for="guestName">Full name *</label><input id="guestName" name="full_name" type="text" required autocomplete="name" placeholder="Your first and last name"></div>
       <div class="field"><label>Will you attend? *</label><div class="choices"><label class="choice"><input required type="radio" name="attending" value="Yes"> Joyfully accepts</label><label class="choice"><input required type="radio" name="attending" value="No"> Regretfully declines</label></div></div>
-      <div class="field" id="guestCountField"><label for="guestCount">Number of guests, including yourself</label><select id="guestCount" name="number_of_attendees"><option value="1">1 person</option><option value="2">2 people</option><option value="3">3 people</option>
+      <div class="field" id="guestCountField"><label for="guestCount">Number of guests, including yourself</label><select id="guestCount" name="number_of_attendees"><option value="1">1 person</option><option value="2">2 people</option><option value="3">3 people</option></select></div>
+      <div id="additionalGuests" hidden><p class="guest-names-note">Please enter the full name and age on the wedding day of each person joining you.</p><div id="guestNameFields"></div></div>
       <input type="hidden" name="additional_guest_names" id="additionalGuestNames" value="">
+      <input type="hidden" name="additional_guest_ages" id="additionalGuestAges" value="">
       <div class="field"><label for="guestNotes">Dietary requirements or a message (optional)</label><textarea id="guestNotes" name="message" placeholder="Allergies, dietary restrictions"></textarea></div>
       <button class="btn submit" type="submit" id="submitBtn">Send My RSVP ♡</button>
       <div id="formMessage" class="form-message" role="status" aria-live="polite"></div>
@@ -928,15 +932,20 @@ document.getElementById('calendar').addEventListener('click',()=>{const txt=['BE
 // RSVP: Netlify Forms accepts submissions only after the website is published there.
 const form=document.getElementById('rsvpForm'),feedback=document.getElementById('formMessage'),submit=document.getElementById('submitBtn'),guestCount=document.getElementById('guestCountField');
 form.querySelectorAll('input[name="attending"]').forEach(r=>r.addEventListener('change',()=>{const no=form.querySelector('[name="attending"]:checked')?.value==='No';guestCount.style.display=no?'none':'';form.querySelector('#guestCount').disabled=no}));
-// Keep every companion's name with the RSVP in the declared Netlify field.
+// Store companion names and ages in declared form fields for submission.
 const attendeeCount=document.getElementById('guestCount');
 const additionalGuests=document.getElementById('additionalGuests');
 const guestNameFields=document.getElementById('guestNameFields');
 const additionalGuestNames=document.getElementById('additionalGuestNames');
-const companionNames=[];
+const additionalGuestAges=document.getElementById('additionalGuestAges');
+const companions=[];
 function saveCompanionNames(){
-  guestNameFields.querySelectorAll('input').forEach((input,index)=>{companionNames[index]=input.value;});
-  additionalGuestNames.value=Array.from(guestNameFields.querySelectorAll('input')).filter(input=>!input.disabled).map(input=>input.value.trim()).join('; ');
+  const rows=Array.from(guestNameFields.querySelectorAll('.companion-row'));
+  rows.forEach((row,index)=>{
+    companions[index]={name:row.querySelector('[data-guest-name]').value,age:row.querySelector('[data-guest-age]').value};
+  });
+  additionalGuestNames.value=rows.map((row,index)=>'Guest '+(index+2)+': '+row.querySelector('[data-guest-name]').value.trim()).join('; ');
+  additionalGuestAges.value=rows.map((row,index)=>'Guest '+(index+2)+': '+row.querySelector('[data-guest-age]').value).join('; ');
 }
 function updateGuestNames(){
   saveCompanionNames();
@@ -945,17 +954,23 @@ function updateGuestNames(){
   additionalGuests.hidden=total===0;
   guestNameFields.replaceChildren();
   for(let i=0;i<total;i++){
-    const field=document.createElement('div');field.className='field';
-    const label=document.createElement('label');label.htmlFor='companion-'+i;label.textContent='Guest '+(i+2)+' full name *';
-    const input=document.createElement('input');input.id=label.htmlFor;input.type='text';input.required=true;input.autocomplete='off';input.placeholder='First and last name';input.value=companionNames[i]||'';
-    input.addEventListener('input',saveCompanionNames);
-    field.append(label,input);guestNameFields.append(field);
+    const row=document.createElement('fieldset');row.className='companion-row';
+    const legend=document.createElement('legend');legend.textContent='Guest '+(i+2);row.append(legend);
+    const nameField=document.createElement('div');nameField.className='field';
+    const nameLabel=document.createElement('label');nameLabel.htmlFor='companion-name-'+i;nameLabel.textContent='Full name *';
+    const name=document.createElement('input');name.id=nameLabel.htmlFor;name.type='text';name.required=true;name.autocomplete='off';name.placeholder='First and last name';name.dataset.guestName='';name.value=companions[i]?.name||'';
+    name.addEventListener('input',saveCompanionNames);nameField.append(nameLabel,name);
+    const ageField=document.createElement('div');ageField.className='field';
+    const ageLabel=document.createElement('label');ageLabel.htmlFor='companion-age-'+i;ageLabel.textContent='Age on the wedding day *';
+    const age=document.createElement('input');age.id=ageLabel.htmlFor;age.type='number';age.inputMode='numeric';age.min='0';age.max='120';age.step='1';age.required=true;age.placeholder='Age in years';age.dataset.guestAge='';age.value=companions[i]?.age??'';
+    age.addEventListener('input',saveCompanionNames);ageField.append(ageLabel,age);
+    row.append(nameField,ageField);guestNameFields.append(row);
   }
   saveCompanionNames();
 }
 attendeeCount.addEventListener('change',updateGuestNames);
 form.querySelectorAll('[name="attending"]').forEach(input=>input.addEventListener('change',updateGuestNames));
-form.addEventListener('reset',()=>{companionNames.length=0;guestNameFields.replaceChildren();additionalGuestNames.value='';setTimeout(updateGuestNames,0);});
+form.addEventListener('reset',()=>{companions.length=0;guestNameFields.replaceChildren();additionalGuestNames.value='';additionalGuestAges.value='';setTimeout(updateGuestNames,0);});
 updateGuestNames();
 function message(msg,kind){feedback.textContent=msg;feedback.className='form-message show '+kind}
 form.addEventListener('submit',async event=>{
